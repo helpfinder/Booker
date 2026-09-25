@@ -56,7 +56,7 @@
     </div>
     <div style="margin-top:0.6rem;">
       <button type="button" class="btn btn-outline btn-small" data-details-toggle
-        data-title="{{ r.title }}" data-authors="{{ r.author_names }}" data-isbn="{{ r.isbn or '' }}">
+        data-ol-key="{{ r.ol_key }}" data-isbn="{{ r.isbn or '' }}">
         {{ t('search.details') }}
       </button>
     </div>
@@ -90,8 +90,7 @@ document.addEventListener('click', async (e) => {
   if (!panel.dataset.loaded) {
     panel.innerHTML = '{{ t("common.loading") }}';
     const params = new URLSearchParams({
-      title: btn.dataset.title || '',
-      author_names: btn.dataset.authors || '',
+      ol_key: btn.dataset.olKey || '',
       isbn: btn.dataset.isbn || '',
     });
     const resp = await fetch('/book/details?' + params.toString());

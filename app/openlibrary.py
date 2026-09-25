@@ -113,3 +113,107 @@ async def search_books_smart(query: str, limit: int = 24) -> list[dict]:
 async def search_by_author_or_series(text: str, limit: int = 40) -> list[dict]:
     """Used by the 'find more books in this series' feature."""
     return await search_books(text, limit=limit)
+
+
+_LANGUAGE_NAMES = {
+    "eng": "EN", "ger": "DE", "deu": "DE", "fre": "FR", "fra": "FR",
+    "spa": "ES", "ita": "IT", "cze": "CS", "ces": "CS", "slo": "SK",
+    "slk": "SK", "pol": "PL", "rus": "RU", "por": "PT", "dut": "NL",
+    "nld": "NL",
+}
+
+
+async def _get_json(client: httpx.AsyncClient, url: str, params: Optional[dict] = None):
+    try:
+        resp = await client.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
+    except httpx.HTTPError:
+        return None
+
+
+async def fetch_details(ol_key: str = "", isbn: str = "") -> Optional[dict]:
+    """Fetch richer per-book info for the "Details" panel: publisher, exact
+    publish date, page count, language, description, subjects and average
+    rating -- all from Open Library, which needs no API key and (unlike
+    Google Books) has no quota wall for anonymous use.
+
+    Combines three calls run in parallel: the edition record (by ISBN, for
+    publisher/pages/publish date/cover), the work record (by ol_key, for
+    the description and subjects), and the work's ratings summary.
+    """
+    if not ol_key and not isbn:
+        return None
+
+    async with httpx.AsyncClient(timeout=8.0) as client:
+        edition_coro = (
+            _get_json(
+                client,
+                f"{OPEN_LIBRARY_BASE}/api/books",
+                {"bibkeys": f"ISBN:{isbn}", "format": "json", "jscmd": "data"},
+            )
+            if isbn
+            else asyncio.sleep(0, result=None)
+        )
+        work_coro = (
+            _get_json(client, f"{OPEN_LIBRARY_BASE}{ol_key}.json")
+            if ol_key
+            else asyncio.sleep(0, result=None)
+        )
+        ratings_coro = (
+            _get_json(client, f"{OPEN_LIBRARY_BASE}{ol_key}/ratings.json")
+            if ol_key
+            else asyncio.sleep(0, result=None)
+        )
+        edition_raw, work, ratings = await asyncio.gather(edition_coro, work_coro, ratings_coro)
+
+    edition = edition_raw.get(f"ISBN:{isbn}") if edition_raw else None
+
+    publisher = None
+    publish_date = None
+    page_count = None
+    cover_url = None
+    language = None
+    if edition:
+        publishers = edition.get("publishers") or []
+        if publishers and isinstance(publishers[0], dict):
+            publisher = publishers[0].get("name")
+        publish_date = edition.get("publish_date")
+        page_count = edition.get("number_of_pages")
+        cover = edition.get("cover") or {}
+        cover_url = cover.get("medium") or cover.get("large") or cover.get("small")
+        languages = edition.get("languages") or []
+        if languages and isinstance(languages[0], dict):
+            code = (languages[0].get("key") or "").rsplit("/", 1)[-1]
+            language = _LANGUAGE_NAMES.get(code, code.upper() or None)
+
+    description = None
+    categories: list[str] = []
+    if work:
+        desc = work.get("description")
+        if isinstance(desc, dict):
+            description = desc.get("value")
+        elif isinstance(desc, str):
+            description = desc
+        categories = (work.get("subjects") or [])[:6]
+
+    average_rating = None
+    if ratings:
+        summary = ratings.get("summary") or {}
+        avg = summary.get("average")
+        if avg:
+            average_rating = round(avg, 1)
+
+    if not any([publisher, publish_date, page_count, description, categories, cover_url, average_rating]):
+        return None
+
+    return {
+        "publisher": publisher,
+        "published_date": publish_date,
+        "page_count": page_count,
+        "language": language,
+        "description": description,
+        "categories": categories,
+        "cover_url": cover_url,
+        "average_rating": average_rating,
+    }
