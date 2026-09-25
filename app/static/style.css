@@ -159,6 +159,7 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
   box-shadow: var(--shadow);
   display: flex;
   gap: 0.8rem;
+  min-width: 0;
 }
 
 .card .cover {
@@ -184,7 +185,7 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
 }
 
 .card .info { flex: 1; min-width: 0; }
-.card .info h3 { margin: 0 0 0.2rem; font-size: 1rem; }
+.card .info h3 { margin: 0 0 0.2rem; font-size: 1rem; overflow-wrap: break-word; word-break: break-word; }
 .card .info .meta { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.5rem; }
 .card .actions { margin-top: 0.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }
 

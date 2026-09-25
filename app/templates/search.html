@@ -25,6 +25,7 @@
       <div class="meta">
         {{ t('search.by') }} {{ r.author_names or t('common.author_unknown') }}
         {% if r.first_publish_year %} &middot; {{ r.first_publish_year }}{% endif %}
+        {% if r.pages %} &middot; {{ r.pages }} {{ t('search.pages') }}{% endif %}
         {% if r.series_name %}<br>{{ r.series_name }}{% if r.series_position %} #{{ r.series_position|int }}{% endif %}{% endif %}
       </div>
       <div class="actions" data-actions>
@@ -38,6 +39,7 @@
             <input type="hidden" name="first_publish_year" value="{{ r.first_publish_year or '' }}">
             <input type="hidden" name="cover_id" value="{{ r.cover_id or '' }}">
             <input type="hidden" name="isbn" value="{{ r.isbn or '' }}">
+            <input type="hidden" name="pages" value="{{ r.pages or '' }}">
             <input type="hidden" name="series_name" value="{{ r.series_name or '' }}">
             <input type="hidden" name="series_position" value="{{ r.series_position or '' }}">
             <select name="status">

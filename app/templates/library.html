@@ -28,6 +28,7 @@
         <div class="meta">
           {{ t('search.by') }} {{ b.author_names or t('common.author_unknown') }}
           {% if b.first_publish_year %} &middot; {{ b.first_publish_year }}{% endif %}
+          {% if b.pages %} &middot; {{ b.pages }} {{ t('search.pages') }}{% endif %}
           {% set sname = ub.effective_series_name() %}
           {% if sname %}<br>{{ sname }}{% if ub.effective_series_position() %} #{{ ub.effective_series_position()|int }}{% endif %}{% endif %}
         </div>

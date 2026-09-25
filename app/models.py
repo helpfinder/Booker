@@ -34,6 +34,7 @@ class Book(SQLModel, table=True):
     first_publish_year: Optional[int] = None
     cover_id: Optional[int] = None
     isbn: Optional[str] = None
+    pages: Optional[int] = None
     series_name: Optional[str] = None
     series_position: Optional[float] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

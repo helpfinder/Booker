@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from app.database import get_session
 from app.models import User, Book, UserBook, ReadStatus
 from app.deps import require_user, get_lang, get_t
-from app.openlibrary import search_books
+from app.openlibrary import search_books_smart
 from app.main import templates
 
 router = APIRouter()
@@ -22,7 +22,7 @@ async def search_page(
 ):
     results = []
     if q.strip():
-        results = await search_books(q, limit=24)
+        results = await search_books_smart(q, limit=24)
 
     existing_keys = set(
         session.exec(
@@ -58,6 +58,7 @@ def _get_or_create_book(session: Session, item: dict) -> Book:
         first_publish_year=item.get("first_publish_year"),
         cover_id=item.get("cover_id"),
         isbn=item.get("isbn"),
+        pages=item.get("pages"),
         series_name=item.get("series_name"),
         series_position=item.get("series_position"),
     )
@@ -76,6 +77,7 @@ async def add_from_search(
     first_publish_year: str = Form(default=""),
     cover_id: str = Form(default=""),
     isbn: str = Form(default=""),
+    pages: str = Form(default=""),
     series_name: str = Form(default=""),
     series_position: str = Form(default=""),
     status: str = Form(default=ReadStatus.WANT_TO_READ.value),
@@ -90,6 +92,7 @@ async def add_from_search(
         "first_publish_year": int(first_publish_year) if first_publish_year.isdigit() else None,
         "cover_id": int(cover_id) if cover_id.isdigit() else None,
         "isbn": isbn or None,
+        "pages": int(pages) if pages.isdigit() else None,
         "series_name": series_name or None,
         "series_position": float(series_position) if series_position else None,
     }
