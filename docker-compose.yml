@@ -1,11 +1,23 @@
 services:
   booktracker:
-    build: .
+    build:
+      context: .
+      network: host
     image: booktracker:latest
     container_name: booktracker
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    # Host networking is used deliberately here: on hosts that force all
+    # outbound DNS through a local resolver (e.g. Pi-hole) via iptables
+    # DNAT, a container on its own bridge network gets its DNS/HTTP
+    # traffic redirected but the reply can't cross Docker's network
+    # isolation back to it. Host networking sidesteps that entirely by
+    # using the host's own network stack/DNS, exactly like a normal
+    # process would. Because of this, the app is told to bind only to
+    # 127.0.0.1 below (see `command`) so it isn't exposed on the public
+    # interface -- put a reverse proxy in front of it when you're ready
+    # to open it up beyond your own machine.
+    network_mode: "host"
+    command: ["uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000"]
     environment:
       - SECRET_KEY=${SECRET_KEY:-please-change-this-secret-key}
       - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-sk}

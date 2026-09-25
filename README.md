@@ -61,6 +61,12 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## Riešenie problémov
+
+**Build alebo appka hlási DNS chyby / "Internal Server Error" pri vyhľadávaní kníh, a na serveri máš Pi-hole (alebo iný lokálny DNS resolver bežiaci v Dockeri) so "sink-hole" iptables pravidlom, ktoré presmeruje všetku DNS prevádzku naň:**
+
+Kontajner na vlastnej Docker sieti dostane svoj DNS dotaz presmerovaný na Pi-hole, ale odpoveď sa cez štandardnú izoláciu medzi Docker sieťami k nemu už nedostane späť. `docker-compose.yml` v tomto repe preto zámerne používa `network_mode: "host"` (appka teda používa priamo sieť/DNS hosta, presne ako bežný proces) a appka je nastavená, aby počúvala len na `127.0.0.1` (pozri `command:` v `docker-compose.yml`) — inak by bola priamo vystavená verejne. Ak appku chceš sprístupniť aj mimo servera, daj pred ňu reverse proxy (napr. Caddy) namiesto zmeny bind adresy na `0.0.0.0`.
+
 ## Poznámky k dátam o sériách
 
 Open Library nemá úplne spoľahlivé/štruktúrované dáta o knižných sériách — appka sa preto snaží sériu a poradie dielu odhadnúť z názvu knihy (bežný formát typu `Názov (Séria, #2)`), a zároveň ti umožní sériu a poradie ručne upraviť/opraviť pri každej knihe vo svojej knižnici. Funkcia "nájsť ďalšie diely" hľadá ďalšie knihy podľa názvu série cez Open Library vyhľadávanie — výsledky preto stojí za to skontrolovať očami, nemusia byť 100% presné.
