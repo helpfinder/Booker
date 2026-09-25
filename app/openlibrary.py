@@ -59,9 +59,14 @@ async def _raw_search(client: httpx.AsyncClient, query: str, limit: int, page: i
         "page": page,
         "fields": SEARCH_FIELDS,
     }
-    resp = await client.get(f"{OPEN_LIBRARY_BASE}/search.json", params=params)
-    resp.raise_for_status()
-    data = resp.json()
+    try:
+        resp = await client.get(f"{OPEN_LIBRARY_BASE}/search.json", params=params)
+        resp.raise_for_status()
+        data = resp.json()
+    except httpx.HTTPError:
+        # Open Library being slow/down shouldn't 500 the page -- just show
+        # no results, same as a query that legitimately found nothing.
+        return []
     return [_doc_to_result(doc) for doc in data.get("docs", [])]
 
 
@@ -113,6 +118,26 @@ async def search_books_smart(query: str, limit: int = 24) -> list[dict]:
 async def search_by_author_or_series(text: str, limit: int = 40) -> list[dict]:
     """Used by the 'find more books in this series' feature."""
     return await search_books(text, limit=limit)
+
+
+async def search_books_field(query: str, field: str, limit: int = 24) -> list[dict]:
+    """Strict, single-field search (author / title / isbn), for when the
+    blended "smart" search still pulls in unrelated matches -- e.g.
+    searching "Neuer" with field=author should return only books whose
+    author is named Neuer, not any title that happens to contain the word.
+    """
+    if not query or not query.strip():
+        return []
+    q = query.strip()
+    if field == "isbn":
+        scoped = f"isbn:{q}"
+    elif field == "author":
+        scoped = f'author:"{q}"'
+    elif field == "title":
+        scoped = f'title:"{q}"'
+    else:
+        scoped = q
+    return await search_books(scoped, limit=limit)
 
 
 _LANGUAGE_NAMES = {

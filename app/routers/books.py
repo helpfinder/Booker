@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from app.database import get_session
 from app.models import User, Book, UserBook, ReadStatus
 from app.deps import require_user, get_lang, get_t
-from app.openlibrary import search_books_smart, fetch_details, lookup_series_from_edition
+from app.openlibrary import search_books_smart, search_books_field, fetch_details, lookup_series_from_edition
 from app.main import templates
 
 router = APIRouter()
@@ -30,14 +30,21 @@ async def book_details(
 async def search_page(
     request: Request,
     q: str = Query(default=""),
+    mode: str = Query(default="any"),
     user: User = Depends(require_user),
     session: Session = Depends(get_session),
     lang: str = Depends(get_lang),
     t=Depends(get_t),
 ):
+    if mode not in ("any", "author", "title", "isbn"):
+        mode = "any"
+
     results = []
     if q.strip():
-        results = await search_books_smart(q, limit=24)
+        if mode == "any":
+            results = await search_books_smart(q, limit=24)
+        else:
+            results = await search_books_field(q, mode, limit=24)
 
     existing_keys = set(
         session.exec(
@@ -55,6 +62,7 @@ async def search_page(
             "lang": lang,
             "user": user,
             "query": q,
+            "mode": mode,
             "results": results,
             "existing_keys": existing_keys,
             "statuses": list(ReadStatus),

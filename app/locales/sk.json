@@ -35,6 +35,10 @@
   "search.by": "od",
   "search.year": "rok",
   "search.pages": "str.",
+  "search.mode_any": "Hocičo",
+  "search.mode_author": "Autor",
+  "search.mode_title": "Názov diela",
+  "search.mode_isbn": "ISBN",
   "search.details": "Detaily",
   "search.publisher": "Vydavateľstvo",
   "search.published_date": "Dátum vydania",
@@ -64,6 +68,7 @@
   "library.notes": "Poznámky",
   "library.edit": "Upraviť",
   "library.saved": "Uložené.",
+  "library.series_name_required": "Ak zadávaš diel série, najprv musíš vyplniť aj názov série.",
 
   "dashboard.title": "Prehľad čítania",
   "dashboard.total_read": "Prečítaných kníh spolu",

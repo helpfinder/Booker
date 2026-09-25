@@ -35,6 +35,10 @@
   "search.by": "by",
   "search.year": "year",
   "search.pages": "pp.",
+  "search.mode_any": "Anything",
+  "search.mode_author": "Author",
+  "search.mode_title": "Title",
+  "search.mode_isbn": "ISBN",
   "search.details": "Details",
   "search.publisher": "Publisher",
   "search.published_date": "Published",
@@ -64,6 +68,7 @@
   "library.notes": "Notes",
   "library.edit": "Edit",
   "library.saved": "Saved.",
+  "library.series_name_required": "If you set a series number, you need to fill in the series name too.",
 
   "dashboard.title": "Reading dashboard",
   "dashboard.total_read": "Total books read",

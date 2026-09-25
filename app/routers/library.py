@@ -37,6 +37,16 @@ def library_page(
 
     entries = [{"user_book": ub, "book": b} for ub, b in rows]
 
+    # All distinct series names this user already has, so the "Séria" field
+    # can suggest them (as a datalist) instead of making people retype an
+    # existing series name by hand every time.
+    all_rows = session.exec(
+        select(UserBook, Book).join(Book, UserBook.book_id == Book.id).where(UserBook.user_id == user.id)
+    ).all()
+    series_names = sorted(
+        {name for ub, b in all_rows if (name := ub.effective_series_name())}
+    )
+
     return templates.TemplateResponse(
         "library.html",
         {
@@ -47,6 +57,7 @@ def library_page(
             "entries": entries,
             "current_status": status,
             "statuses": list(ReadStatus),
+            "series_names": series_names,
         },
     )
 
@@ -100,11 +111,24 @@ def edit_entry(
     if ub:
         ub.rating = int(rating) if rating.isdigit() else None
         ub.notes = notes or None
-        ub.series_name = series_name or None
-        try:
-            ub.series_position = float(series_position) if series_position else None
-        except ValueError:
-            ub.series_position = None
+        ub.series_name = series_name.strip() or None
+
+        # Series position must be a whole number >= 1 (sanity-bounded so a
+        # stray value can't do anything worse than get ignored), and only
+        # meaningful when there's an actual series name to go with it --
+        # either just set above, or already inherited from the book itself.
+        position = None
+        if series_position.strip():
+            try:
+                candidate = int(series_position)
+                if 1 <= candidate <= 9999:
+                    position = candidate
+            except ValueError:
+                position = None
+
+        effective_name = ub.series_name or (ub.book.series_name if ub.book else None)
+        ub.series_position = position if effective_name else None
+
         try:
             ub.date_started = datetime.strptime(date_started, "%Y-%m-%d").date() if date_started else None
         except ValueError:

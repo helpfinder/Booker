@@ -9,6 +9,14 @@
   {% endfor %}
 </div>
 
+{% if series_names %}
+<datalist id="series-names-list">
+  {% for name in series_names %}
+  <option value="{{ name }}">
+  {% endfor %}
+</datalist>
+{% endif %}
+
 {% if not entries %}
   <p class="empty-state">{{ t('library.empty') }}</p>
 {% else %}
@@ -62,7 +70,7 @@
     <div class="details-panel" id="details-{{ ub.id }}"></div>
 
     <div class="edit-panel" id="edit-{{ ub.id }}">
-      <form method="post" action="/library/{{ ub.id }}/edit">
+      <form method="post" action="/library/{{ ub.id }}/edit" data-edit-form data-has-existing-series="{{ '1' if b.series_name else '' }}">
         <div class="edit-grid">
           <div class="field">
             <label>{{ t('library.rating') }}</label>
@@ -75,11 +83,13 @@
           </div>
           <div class="field">
             <label>{{ t('library.series_position') }}</label>
-            <input type="number" step="0.1" name="series_position" value="{{ ub.series_position if ub.series_position is not none else '' }}">
+            <input type="number" min="1" step="1" name="series_position" data-series-position
+              value="{{ ub.series_position|int if ub.series_position is not none else '' }}">
           </div>
           <div class="field" style="grid-column: 1 / -1;">
             <label>{{ t('library.series_name') }}</label>
-            <input type="text" name="series_name" value="{{ ub.series_name or '' }}" placeholder="{{ b.series_name or '' }}">
+            <input type="text" name="series_name" data-series-name list="series-names-list"
+              value="{{ ub.series_name or '' }}" placeholder="{{ b.series_name or '' }}">
           </div>
           <div class="field">
             <label>{{ t('library.date_started') }}</label>
@@ -123,6 +133,19 @@ document.addEventListener('click', async (e) => {
       panel.innerHTML = await resp.text();
       panel.dataset.loaded = '1';
     }
+  }
+});
+
+document.addEventListener('submit', (e) => {
+  const form = e.target.closest('[data-edit-form]');
+  if (!form) return;
+  const posInput = form.querySelector('[data-series-position]');
+  const nameInput = form.querySelector('[data-series-name]');
+  const hasExisting = form.dataset.hasExistingSeries === '1';
+  if (posInput.value.trim() && !nameInput.value.trim() && !hasExisting) {
+    e.preventDefault();
+    nameInput.focus();
+    alert('{{ t("library.series_name_required") }}');
   }
 });
 </script>
