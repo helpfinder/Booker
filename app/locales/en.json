@@ -35,6 +35,13 @@
   "search.by": "by",
   "search.year": "year",
   "search.pages": "pp.",
+  "search.details": "Details",
+  "search.publisher": "Publisher",
+  "search.published_date": "Published",
+  "search.language": "Language",
+  "search.categories": "Genre",
+  "search.rating": "Rating",
+  "search.details_unavailable": "Couldn't find further details for this book.",
 
   "status.want_to_read": "Want to read",
   "status.reading": "Reading",

@@ -6,9 +6,26 @@ from app.database import get_session
 from app.models import User, Book, UserBook, ReadStatus
 from app.deps import require_user, get_lang, get_t
 from app.openlibrary import search_books_smart
+from app.googlebooks import fetch_details
 from app.main import templates
 
 router = APIRouter()
+
+
+@router.get("/book/details", response_class=HTMLResponse)
+async def book_details(
+    request: Request,
+    title: str = "",
+    author_names: str = "",
+    isbn: str = "",
+    user: User = Depends(require_user),
+    t=Depends(get_t),
+):
+    details = await fetch_details(title, author_names, isbn or None)
+    return templates.TemplateResponse(
+        "partials/book_details.html",
+        {"request": request, "t": t, "details": details},
+    )
 
 
 @router.get("/search", response_class=HTMLResponse)

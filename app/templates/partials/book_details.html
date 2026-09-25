@@ -1,0 +1,23 @@
+{% if not details %}
+  <p class="muted">{{ t('search.details_unavailable') }}</p>
+{% else %}
+  <div class="book-details">
+    {% if details.cover_url %}
+    <img class="details-cover" src="{{ details.cover_url }}" alt="">
+    {% endif %}
+    <div class="details-facts">
+      {% if details.publisher %}<div><strong>{{ t('search.publisher') }}:</strong> {{ details.publisher }}</div>{% endif %}
+      {% if details.published_date %}<div><strong>{{ t('search.published_date') }}:</strong> {{ details.published_date }}</div>{% endif %}
+      {% if details.page_count %}<div><strong>{{ t('search.pages') }}:</strong> {{ details.page_count }}</div>{% endif %}
+      {% if details.language %}<div><strong>{{ t('search.language') }}:</strong> {{ details.language|upper }}</div>{% endif %}
+      {% if details.categories %}<div><strong>{{ t('search.categories') }}:</strong> {{ details.categories|join(', ') }}</div>{% endif %}
+      {% if details.average_rating %}<div><strong>{{ t('search.rating') }}:</strong> {{ details.average_rating }} / 5</div>{% endif %}
+    </div>
+    {% if details.description %}
+    <div class="book-description">{{ details.description }}</div>
+    {% endif %}
+    {% if not details.publisher and not details.published_date and not details.page_count and not details.description %}
+    <p class="muted">{{ t('search.details_unavailable') }}</p>
+    {% endif %}
+  </div>
+{% endif %}

@@ -35,6 +35,13 @@
   "search.by": "od",
   "search.year": "rok",
   "search.pages": "str.",
+  "search.details": "Detaily",
+  "search.publisher": "Vydavateľstvo",
+  "search.published_date": "Dátum vydania",
+  "search.language": "Jazyk",
+  "search.categories": "Žáner",
+  "search.rating": "Hodnotenie",
+  "search.details_unavailable": "Pre túto knihu sa nepodarilo nájsť ďalšie detaily.",
 
   "status.want_to_read": "Chcem čítať",
   "status.reading": "Čítam",

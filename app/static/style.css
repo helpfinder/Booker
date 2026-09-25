@@ -256,6 +256,20 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
 .series-book-row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px dashed var(--border); font-size: 0.9rem; }
 .series-book-row:last-child { border-bottom: none; }
 
+.details-panel { display: none; margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed var(--border); font-size: 0.85rem; }
+.details-panel.open { display: block; }
+.book-details { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+.details-cover { width: 70px; height: 105px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+.details-facts { display: flex; flex-direction: column; gap: 0.2rem; min-width: 140px; }
+.book-description {
+  flex-basis: 100%;
+  color: var(--text-muted);
+  max-height: 160px;
+  overflow-y: auto;
+  line-height: 1.45;
+  margin-top: 0.3rem;
+}
+
 .rating-form { display: flex; align-items: center; gap: 0.4rem; }
 .rating-form select { width: auto; padding: 0.3rem 0.4rem; }
 
