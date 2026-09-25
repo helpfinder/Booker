@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container">
+  <h1>{{ t('auth.register_title') }}</h1>
+  {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+  {% if allow_registration %}
+  <form method="post" action="/register">
+    <div class="field">
+      <label>{{ t('auth.email') }}</label>
+      <input type="email" name="email" required autofocus>
+    </div>
+    <div class="field">
+      <label>{{ t('auth.username') }}</label>
+      <input type="text" name="username" required minlength="2" maxlength="30">
+    </div>
+    <div class="field">
+      <label>{{ t('auth.password') }}</label>
+      <input type="password" name="password" required minlength="8">
+    </div>
+    <div class="field">
+      <label>{{ t('auth.password_confirm') }}</label>
+      <input type="password" name="password_confirm" required minlength="8">
+    </div>
+    <button class="btn btn-block" type="submit">{{ t('auth.register_button') }}</button>
+  </form>
+  {% endif %}
+  <p class="muted" style="margin-top:1rem;">
+    {{ t('auth.have_account') }} <a href="/login">{{ t('nav.login') }}</a>
+  </p>
+</div>
+{% endblock %}

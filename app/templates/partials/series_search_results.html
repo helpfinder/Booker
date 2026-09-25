@@ -1,0 +1,40 @@
+{% if not results %}
+  <p class="muted">{{ t('search.no_results') }}</p>
+{% else %}
+<div class="grid">
+  {% for r in results %}
+  <div class="card">
+    {% if r.cover_id %}
+      <img class="cover" src="https://covers.openlibrary.org/b/id/{{ r.cover_id }}-M.jpg" alt="">
+    {% else %}
+      <div class="cover-placeholder">📖</div>
+    {% endif %}
+    <div class="info">
+      <h3>{{ r.title }}</h3>
+      <div class="meta">
+        {{ t('search.by') }} {{ r.author_names or t('common.author_unknown') }}
+        {% if r.first_publish_year %} &middot; {{ r.first_publish_year }}{% endif %}
+      </div>
+      <div class="actions" data-actions>
+        {% if r.ol_key in owned_keys %}
+          <span class="badge success">{{ t('search.already_added') }}</span>
+        {% else %}
+          <form data-add-form>
+            <input type="hidden" name="ol_key" value="{{ r.ol_key }}">
+            <input type="hidden" name="title" value="{{ r.title }}">
+            <input type="hidden" name="author_names" value="{{ r.author_names }}">
+            <input type="hidden" name="first_publish_year" value="{{ r.first_publish_year or '' }}">
+            <input type="hidden" name="cover_id" value="{{ r.cover_id or '' }}">
+            <input type="hidden" name="isbn" value="{{ r.isbn or '' }}">
+            <input type="hidden" name="series_name" value="{{ series_name }}">
+            <input type="hidden" name="series_position" value="{{ r.series_position or '' }}">
+            <input type="hidden" name="status" value="want_to_read">
+            <button type="submit" class="btn btn-small">{{ t('series.add_missing') }}</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

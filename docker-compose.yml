@@ -1,0 +1,17 @@
+services:
+  booktracker:
+    build: .
+    image: booktracker:latest
+    container_name: booktracker
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-please-change-this-secret-key}
+      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-sk}
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION:-true}
+    volumes:
+      - booktracker-data:/app/data
+
+volumes:
+  booktracker-data:

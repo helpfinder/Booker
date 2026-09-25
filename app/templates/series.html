@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t('nav.series') }}</h1>
+
+{% if not series_summaries %}
+  <p class="empty-state">{{ t('series.no_series') }}</p>
+{% else %}
+  {% for s in series_summaries %}
+  <div class="chart-section series-card">
+    <div class="series-header">
+      <h2 style="margin:0;">{{ s.name }}</h2>
+      <span class="muted">{{ s.authors|join(', ') }}</span>
+    </div>
+    <div class="muted">{{ t('series.progress') }}: {{ s.read_count }} / {{ s.total }}</div>
+    <div class="series-progress-track">
+      <div class="series-progress-fill" style="width: {{ (s.read_count / s.total * 100) if s.total else 0 }}%;"></div>
+    </div>
+
+    {% for ub, b in s.entries %}
+    <div class="series-book-row">
+      <span>{% if ub.effective_series_position() %}#{{ ub.effective_series_position()|int }} — {% endif %}{{ b.title }}</span>
+      <span class="badge {{ 'success' if ub.status.value == 'read' }}">{{ t('status.' + ub.status.value) }}</span>
+    </div>
+    {% endfor %}
+
+    <div style="margin-top:0.9rem;">
+      <button type="button" class="btn btn-outline btn-small" data-find-series="{{ s.name }}">{{ t('series.find_more') }}</button>
+      <div data-series-results="{{ s.name }}" style="margin-top:0.8rem;"></div>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<script>
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-find-series]');
+  if (!btn) return;
+  const name = btn.getAttribute('data-find-series');
+  const target = document.querySelector(`[data-series-results="${CSS.escape(name)}"]`);
+  target.innerHTML = '{{ t("common.loading") }}';
+  const resp = await fetch('/series/find?name=' + encodeURIComponent(name));
+  if (resp.ok) {
+    target.innerHTML = await resp.text();
+  }
+});
+
+document.addEventListener('submit', async (e) => {
+  const form = e.target.closest('[data-add-form]');
+  if (!form) return;
+  e.preventDefault();
+  const actionsEl = form.closest('[data-actions]');
+  const resp = await fetch('/search/add', { method: 'POST', body: new FormData(form) });
+  if (resp.ok) {
+    actionsEl.innerHTML = await resp.text();
+  }
+});
+</script>
+{% endblock %}

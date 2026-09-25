@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t('dashboard.title') }}</h1>
+
+{% if not has_data %}
+  <p class="empty-state">{{ t('dashboard.no_data') }}</p>
+{% endif %}
+
+<div class="stats-grid">
+  <div class="stat-tile">
+    <div class="value">{{ total_read }}</div>
+    <div class="label">{{ t('dashboard.total_read') }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="value">{{ read_this_year_count }}</div>
+    <div class="label">{{ t('dashboard.this_year') }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="value">{{ avg_rating if avg_rating is not none else '—' }}</div>
+    <div class="label">{{ t('dashboard.avg_rating') }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="value">{{ currently_reading|length }}</div>
+    <div class="label">{{ t('dashboard.currently_reading') }}</div>
+  </div>
+</div>
+
+{% if currently_reading %}
+<div class="chart-section">
+  <h2>{{ t('dashboard.currently_reading') }}</h2>
+  {% for ub, b in currently_reading %}
+    <div class="series-book-row"><span>{{ b.title }}</span><span class="muted">{{ b.author_names }}</span></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if books_per_year %}
+<div class="chart-section">
+  <h2>{{ t('dashboard.books_per_year') }}</h2>
+  <div class="bar-chart">
+    {% for p in books_per_year %}
+    <div class="bar-col">
+      <div class="bar-count">{{ p.count }}</div>
+      <div class="bar" style="height: {{ (p.count / max_per_year * 100) if max_per_year else 0 }}%;"></div>
+      <div class="bar-label">{{ p.year }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if read_this_year_count > 0 %}
+<div class="chart-section">
+  <h2>{{ t('dashboard.books_per_month') }}</h2>
+  <div class="bar-chart">
+    {% for p in books_per_month %}
+    <div class="bar-col">
+      <div class="bar-count">{{ p.count if p.count > 0 else '' }}</div>
+      <div class="bar" style="height: {{ (p.count / max_per_month * 100) if max_per_month else 0 }}%;"></div>
+      <div class="bar-label">{{ p.month }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if top_authors %}
+<div class="chart-section">
+  <h2>{{ t('dashboard.top_authors') }}</h2>
+  <div class="author-bars">
+    {% for name, count in top_authors %}
+    <div class="author-bar-row">
+      <div class="name">{{ name }}</div>
+      <div class="author-bar-track"><div class="author-bar-fill" style="width: {{ (count / max_author_count * 100) if max_author_count else 0 }}%;"></div></div>
+      <div>{{ count }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
