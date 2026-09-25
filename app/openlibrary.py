@@ -174,6 +174,7 @@ async def fetch_details(ol_key: str = "", isbn: str = "") -> Optional[dict]:
     page_count = None
     cover_url = None
     language = None
+    series_hint = None
     if edition:
         publishers = edition.get("publishers") or []
         if publishers and isinstance(publishers[0], dict):
@@ -186,6 +187,9 @@ async def fetch_details(ol_key: str = "", isbn: str = "") -> Optional[dict]:
         if languages and isinstance(languages[0], dict):
             code = (languages[0].get("key") or "").rsplit("/", 1)[-1]
             language = _LANGUAGE_NAMES.get(code, code.upper() or None)
+        series_list = edition.get("series") or []
+        if series_list:
+            series_hint = series_list[0]
 
     description = None
     categories: list[str] = []
@@ -198,13 +202,17 @@ async def fetch_details(ol_key: str = "", isbn: str = "") -> Optional[dict]:
         categories = (work.get("subjects") or [])[:6]
 
     average_rating = None
+    rating_count = None
     if ratings:
         summary = ratings.get("summary") or {}
         avg = summary.get("average")
         if avg:
             average_rating = round(avg, 1)
+            rating_count = summary.get("count")
 
-    if not any([publisher, publish_date, page_count, description, categories, cover_url, average_rating]):
+    if not any(
+        [publisher, publish_date, page_count, description, categories, cover_url, average_rating, series_hint]
+    ):
         return None
 
     return {
@@ -216,4 +224,56 @@ async def fetch_details(ol_key: str = "", isbn: str = "") -> Optional[dict]:
         "categories": categories,
         "cover_url": cover_url,
         "average_rating": average_rating,
+        "rating_count": rating_count,
+        "series_hint": series_hint,
     }
+
+
+SERIES_FIELD_PATTERN = re.compile(
+    r"^(?P<name>.*?)[,]?\s*(?:#|[Bb]ook|[Vv]ol\.?|[Vv]olume)\s*(?P<num>[\d.]+)\s*$"
+)
+
+
+def parse_series_field(raw: str):
+    """Parse an Open Library edition "series" string, e.g. 'Harry Potter #1'
+    or 'Harry Potter, Book 1' or just 'Harry Potter' (no position).
+    Returns (name, position).
+    """
+    raw = (raw or "").strip()
+    if not raw:
+        return None, None
+    match = SERIES_FIELD_PATTERN.match(raw)
+    if match:
+        name = match.group("name").strip().rstrip(",").strip()
+        try:
+            position = float(match.group("num"))
+        except (TypeError, ValueError):
+            position = None
+        return (name or raw), position
+    return raw, None
+
+
+async def lookup_series_from_edition(isbn: str):
+    """Fallback series lookup used when adding a book: if the title itself
+    didn't encode a series (see parse_series_from_title), some Open Library
+    editions carry a separate "series" field we can check via ISBN. Not
+    every book has this either, but it catches a few more cases for free.
+    Returns (series_name, series_position), both possibly None.
+    """
+    if not isbn:
+        return None, None
+    async with httpx.AsyncClient(timeout=8.0) as client:
+        data = await _get_json(
+            client,
+            f"{OPEN_LIBRARY_BASE}/api/books",
+            {"bibkeys": f"ISBN:{isbn}", "format": "json", "jscmd": "data"},
+        )
+    if not data:
+        return None, None
+    edition = data.get(f"ISBN:{isbn}")
+    if not edition:
+        return None, None
+    series_list = edition.get("series") or []
+    if not series_list:
+        return None, None
+    return parse_series_field(series_list[0])

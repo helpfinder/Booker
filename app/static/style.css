@@ -147,7 +147,7 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 1rem;
 }
 
@@ -163,8 +163,8 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
 }
 
 .card .cover {
-  width: 60px;
-  height: 90px;
+  width: 96px;
+  height: 144px;
   object-fit: cover;
   border-radius: 5px;
   background: var(--accent-soft);
@@ -172,15 +172,15 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
 }
 
 .card .cover-placeholder {
-  width: 60px;
-  height: 90px;
+  width: 96px;
+  height: 144px;
   border-radius: 5px;
   background: var(--accent-soft);
   color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 2.2rem;
   flex-shrink: 0;
 }
 
@@ -259,7 +259,7 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
 .details-panel { display: none; margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed var(--border); font-size: 0.85rem; }
 .details-panel.open { display: block; }
 .book-details { display: flex; flex-wrap: wrap; gap: 0.7rem; }
-.details-cover { width: 70px; height: 105px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+.details-cover { width: 110px; height: 165px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
 .details-facts { display: flex; flex-direction: column; gap: 0.2rem; min-width: 140px; }
 .book-description {
   flex-basis: 100%;

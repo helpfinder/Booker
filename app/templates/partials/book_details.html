@@ -11,7 +11,14 @@
       {% if details.page_count %}<div><strong>{{ t('search.pages') }}:</strong> {{ details.page_count }}</div>{% endif %}
       {% if details.language %}<div><strong>{{ t('search.language') }}:</strong> {{ details.language|upper }}</div>{% endif %}
       {% if details.categories %}<div><strong>{{ t('search.categories') }}:</strong> {{ details.categories|join(', ') }}</div>{% endif %}
-      {% if details.average_rating %}<div><strong>{{ t('search.rating') }}:</strong> {{ details.average_rating }} / 5</div>{% endif %}
+      {% if details.series_hint %}<div><strong>{{ t('series.title') }}:</strong> {{ details.series_hint }}</div>{% endif %}
+      {% if details.average_rating %}
+      <div>
+        <strong>{{ t('search.rating') }}:</strong> {{ details.average_rating }} / 5
+        {% if details.rating_count %}&middot; {{ details.rating_count }} {{ t('search.ratings_count') }}{% endif %}
+        <span class="muted">({{ t('search.source_open_library') }})</span>
+      </div>
+      {% endif %}
     </div>
     {% if details.description %}
     <div class="book-description">{{ details.description }}</div>

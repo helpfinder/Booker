@@ -41,6 +41,8 @@
   "search.language": "Language",
   "search.categories": "Genre",
   "search.rating": "Rating",
+  "search.ratings_count": "ratings",
+  "search.source_open_library": "source: Open Library",
   "search.details_unavailable": "Couldn't find further details for this book.",
 
   "status.want_to_read": "Want to read",

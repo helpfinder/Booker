@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from app.database import get_session
 from app.models import User, Book, UserBook, ReadStatus
 from app.deps import require_user, get_lang, get_t
-from app.openlibrary import search_books_smart, fetch_details
+from app.openlibrary import search_books_smart, fetch_details, lookup_series_from_edition
 from app.main import templates
 
 router = APIRouter()
@@ -111,6 +111,16 @@ async def add_from_search(
         "series_name": series_name or None,
         "series_position": float(series_position) if series_position else None,
     }
+
+    # The title itself often doesn't encode the series (parse_series_from_title
+    # only catches "Book Name (Series, #2)"-style titles). As a fallback, check
+    # if the edition has a separate "series" field via ISBN.
+    if not item["series_name"] and item["isbn"]:
+        detected_name, detected_position = await lookup_series_from_edition(item["isbn"])
+        if detected_name:
+            item["series_name"] = detected_name
+            item["series_position"] = detected_position
+
     book = _get_or_create_book(session, item)
 
     existing = session.exec(

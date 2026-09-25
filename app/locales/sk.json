@@ -41,6 +41,8 @@
   "search.language": "Jazyk",
   "search.categories": "Žáner",
   "search.rating": "Hodnotenie",
+  "search.ratings_count": "hodnotení",
+  "search.source_open_library": "zdroj: Open Library",
   "search.details_unavailable": "Pre túto knihu sa nepodarilo nájsť ďalšie detaily.",
 
   "status.want_to_read": "Chcem čítať",
